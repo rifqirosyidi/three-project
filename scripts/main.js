@@ -35,7 +35,22 @@ const uniforms = {
 }
 
 // Objects
-let box, box2, box2Obj, box3, box3Obj, octahedron, octaObj, octaMoon, octaObj2, octaMoon2;
+let box,
+  box2,
+  box2Obj,
+  box3,
+  box3Obj,
+  octahedron,
+  octaOrbit,
+  octaMoon,
+  octaOrbit2,
+  octaMoon2,
+  icosahedron,
+  icosahedronRing,
+  icosahedronOrbit,
+  icosahedronMoon,
+  icosahedronOrbit2,
+  icosahedronMoon2;
 
 init()
 animate()
@@ -48,7 +63,7 @@ function init() {
   renderer.shadowMap.enabled = true
   // const control = new OrbitControls(camera, renderer.domElement)
 
-  camera.position.set(0, 0, 21)
+  camera.position.set(0, 0, 39)
   // control.update
 
   const skyBox = new THREE.CubeTextureLoader()
@@ -87,23 +102,39 @@ function init() {
   const hiText = generateText({
     text: "hi, i am",
     size: 0.15,
-    position: [0, 4, 18]
+    position: [0, 3, 18]
   })
   scene.add(hiText)
 
   const nameText = generateText({
     text: "Rifqi Rosyidi",
     size: 0.5,
-    position: [0, 3, 18]
+    position: [0, 2, 18]
   });
   scene.add(nameText);
+
 
   const bioText = generateText({
     text: "Web Developer, Designer",
     size: 0.15,
-    position: [0, -3, 18]
+    position: [0, -2, 18]
   });
   scene.add(bioText);
+
+  const aboutText = generateText({
+    text: "About",
+    size: 0.4,
+    position: [0, 3, 38]
+  });
+  scene.add(aboutText);
+
+  const aboutDescription = generateText({
+    text: `Hi, I am Rifqi, i'm 24. \nWhile I'm a proficient Full-Stack Developer,\nMy expertise is in Front End Development Such as HTML/CSS,\nResponsive Design, UI Design, React.js, Gatsby.js, Three, etc`,
+    size: 0.15,
+    position: [0, 2, 38]
+  });
+  scene.add(aboutDescription);
+
 
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
@@ -133,23 +164,58 @@ function init() {
   scene.add(octahedron)
   octahedron.position.set(0, 0, 15)
 
-  octaObj = new THREE.Object3D()
-  octaObj2 = new THREE.Object3D()
-  octaObj.position.set(0, 0, 15)
-  octaObj2.position.set(0, 0, 15)
+  octaOrbit = new THREE.Object3D()
+  octaOrbit2 = new THREE.Object3D()
+  octaOrbit.position.set(0, 0, 15)
+  octaOrbit2.position.set(0, 0, 15)
 
   const octaMoonGeo = new THREE.OctahedronGeometry(0.2)
   octaMoon = new THREE.Mesh(octaMoonGeo, octaMat)
   octaMoon2 = octaMoon.clone()
 
-  octaObj.add(octaMoon)
-  octaObj2.add(octaMoon2)
+  octaOrbit.add(octaMoon)
+  octaOrbit2.add(octaMoon2)
+  scene.add(octaOrbit)
+  scene.add(octaOrbit2)
 
   octaMoon.position.x = 5
   octaMoon2.position.x = 3.5
 
-  scene.add(octaObj)
-  scene.add(octaObj2)
+  const icosahedronGeo = new THREE.IcosahedronGeometry(0.5)
+  const icosahedronMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  icosahedron = new THREE.Mesh(icosahedronGeo, icosahedronMat)
+  scene.add(icosahedron)
+  icosahedron.position.z = 38
+  icosahedron.position.y = -1
+
+  const icosahedronRingGeo = new THREE.RingGeometry(1.5, 1.52, 16)
+  const icosahedronRingMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, side: THREE.DoubleSide })
+  icosahedronRing = new THREE.Mesh(icosahedronRingGeo, icosahedronRingMat)
+  scene.add(icosahedronRing)
+  icosahedronRing.position.z = 38
+  icosahedronRing.position.y = -1
+  icosahedronRing.rotation.x = 0.52 * Math.PI
+
+  icosahedronOrbit = new THREE.Object3D()
+  icosahedronOrbit.position.set(0, -1, 38)
+  icosahedronOrbit.rotation.z = 45 * Math.PI / 180
+
+  icosahedronOrbit2 = new THREE.Object3D()
+  icosahedronOrbit2.position.set(0, -1, 38)
+  icosahedronOrbit2.rotation.z = 35 * Math.PI / 180
+
+  const icosahedronMoonGeo = new THREE.IcosahedronGeometry(0.1)
+  icosahedronMoon = new THREE.Mesh(icosahedronMoonGeo, icosahedronMat)
+  icosahedronMoon2 = icosahedronMoon.clone()
+
+  icosahedronOrbit.add(icosahedronMoon)
+  icosahedronOrbit2.add(icosahedronMoon2)
+  scene.add(icosahedronOrbit)
+  scene.add(icosahedronOrbit2)
+  icosahedronMoon.position.x = 3
+  icosahedronMoon2.position.x = -2
+
+
 
 
 
@@ -193,25 +259,35 @@ function animate() {
   box3.rotation.y -= 0.001
   box3.rotation.x += 0.03
 
-  octaObj.rotation.y += 0.005
-  octaObj.rotation.x += 0.001
+  octaOrbit.rotation.y += 0.005
+  octaOrbit.rotation.x += 0.001
 
-  octaObj2.rotation.y += 0.01
-  octaObj2.rotation.x += 0.001
+  octaOrbit2.rotation.y += 0.01
+  octaOrbit2.rotation.x += 0.001
 
   octahedron.rotation.y += 0.005
   octahedron.rotation.x += 0.001
 
   octaMoon.rotation.y += 0.01
 
+  icosahedron.rotation.y += 0.004
+  icosahedron.rotation.x += 0.004
+
+  icosahedronRing.rotation.z += 0.002
+
+  icosahedronOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
+  icosahedronOrbit2.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.008)
+
+  icosahedronMoon.rotation.x += 0.04
+  icosahedronMoon2.rotation.x += 0.02
+
   box2Obj.rotation.y += 0.01
   box3Obj.rotation.x += 0.003
   box3Obj.rotation.y += 0.003
 
 
-
-  target.x = (1 - mouse.x) * 0.0001;
-  target.y = (1 - mouse.y) * 0.0001;
+  target.x = (1 - mouse.x) * 0.0004;
+  target.y = (1 - mouse.y) * 0.0004;
 
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
