@@ -1,6 +1,7 @@
 import * as THREE from "three";
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { generateText } from "./utils.js";
+import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer"
+import { generateText, makeTextSprite } from "./utils.js";
 
 const skyLeft = new URL('/images/skybox/left.png', import.meta.url).href
 const skyRight = new URL('/images/skybox/right.png', import.meta.url).href
@@ -9,15 +10,12 @@ const skyBottom = new URL('/images/skybox/bottom.png', import.meta.url).href
 const skyFront = new URL('/images/skybox/front.png', import.meta.url).href
 const skyBack = new URL('/images/skybox/back.png', import.meta.url).href
 
-console.log(skyLeft)
-
-
 let camera, scene, renderer, raycaster, mousePosition, sphereId;
 
 const clock = new THREE.Clock()
 const mouse = new THREE.Vector2();
 const target = new THREE.Vector2();
-const windowHalf = new THREE.Vector2(window.innerWidth / 6, window.innerHeight / 6);
+const windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
 
 
 const options = {
@@ -46,11 +44,13 @@ let box,
   octaOrbit2,
   octaMoon2,
   icosahedron,
-  icosahedronRing,
   icosahedronOrbit,
   icosahedronMoon,
   icosahedronOrbit2,
-  icosahedronMoon2;
+  icosahedronMoon2,
+  dodecahedron
+
+let skillOrbit, skillHtml;
 
 init()
 animate()
@@ -63,7 +63,7 @@ function init() {
   renderer.shadowMap.enabled = true
   // const control = new OrbitControls(camera, renderer.domElement)
 
-  camera.position.set(0, 0, 10)
+  camera.position.set(0, 0, 65)
   // control.update
 
   const skyBox = new THREE.CubeTextureLoader()
@@ -135,6 +135,81 @@ function init() {
   });
   scene.add(aboutDescription);
 
+  const skillText = generateText({
+    text: "Skill Cloud",
+    size: 0.4,
+    position: [0, 4.2, 58]
+  });
+  scene.add(skillText);
+
+  skillOrbit = new THREE.Object3D()
+  skillOrbit.position.set(1.75, -1, 58)
+  skillOrbit.rotation.z = 30 * Math.PI / 180
+
+  scene.add(skillOrbit)
+
+  var skillHTML = makeTextSprite("HTML",
+    { fontsize: 14 });
+  skillHTML.position.set(4, 0, 0);
+  skillOrbit.add(skillHTML);
+
+  var skillCSS = makeTextSprite("CSS",
+    { fontsize: 14 });
+  skillCSS.position.set(-2, 1, 0);
+  skillOrbit.add(skillCSS);
+
+  var skillJavascript = makeTextSprite("Javascript",
+    { fontsize: 14 });
+  skillJavascript.position.set(-2, -1, 0);
+  skillOrbit.add(skillJavascript);
+
+  var skillReact = makeTextSprite("React.js",
+    { fontsize: 14 });
+  skillReact.position.set(-4, 1.5, 0);
+  skillOrbit.add(skillReact);
+
+  var skillDesign = makeTextSprite("UI Design & Animation",
+    { fontsize: 14 });
+  skillDesign.position.set(1, 2, 2);
+  skillOrbit.add(skillDesign);
+
+  var skillFigma = makeTextSprite("Figma",
+    { fontsize: 14 });
+  skillFigma.position.set(2, 0, 3);
+  skillOrbit.add(skillFigma);
+
+  var skillGsap = makeTextSprite("Gsap",
+    { fontsize: 14 });
+  skillGsap.position.set(1, 2, 4);
+  skillOrbit.add(skillGsap);
+
+  var skillFramer = makeTextSprite("Framer Motion",
+    { fontsize: 14 });
+  skillFramer.position.set(-1, 0, 2);
+  skillOrbit.add(skillFramer);
+
+  var skillThree = makeTextSprite("Three.js",
+    { fontsize: 14 });
+  skillThree.position.set(0, 2.3, 4);
+  skillOrbit.add(skillThree);
+
+  var skillPhp = makeTextSprite("Php",
+    { fontsize: 14 });
+  skillPhp.position.set(0, 0, -2);
+  skillOrbit.add(skillPhp);
+
+  var skillSql = makeTextSprite("My SQL",
+    { fontsize: 14 });
+  skillSql.position.set(1, 2, -3);
+  skillOrbit.add(skillSql);
+
+  var skillPython = makeTextSprite("Python",
+    { fontsize: 14 });
+  skillPython.position.set(2, 0, -4);
+  skillOrbit.add(skillPython);
+
+
+
 
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
@@ -188,14 +263,6 @@ function init() {
   icosahedron.position.z = 38
   icosahedron.position.y = -1
 
-  const icosahedronRingGeo = new THREE.RingGeometry(1.5, 1.52, 16)
-  const icosahedronRingMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, side: THREE.DoubleSide })
-  icosahedronRing = new THREE.Mesh(icosahedronRingGeo, icosahedronRingMat)
-  scene.add(icosahedronRing)
-  icosahedronRing.position.z = 38
-  icosahedronRing.position.y = -1
-  icosahedronRing.rotation.x = 0.52 * Math.PI
-
   icosahedronOrbit = new THREE.Object3D()
   icosahedronOrbit.position.set(0, -1, 38)
   icosahedronOrbit.rotation.z = 45 * Math.PI / 180
@@ -215,9 +282,11 @@ function init() {
   icosahedronMoon.position.x = 3
   icosahedronMoon2.position.x = -2
 
-
-
-
+  const dodecahedronGeo = new THREE.TetrahedronGeometry(0.5)
+  const dodecahedronMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  dodecahedron = new THREE.Mesh(dodecahedronGeo, dodecahedronMat)
+  scene.add(dodecahedron)
+  dodecahedron.position.set(0, 0, 58)
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
@@ -273,13 +342,16 @@ function animate() {
   icosahedron.rotation.y += 0.004
   icosahedron.rotation.x += 0.004
 
-  icosahedronRing.rotation.z += 0.002
-
   icosahedronOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
   icosahedronOrbit2.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.008)
 
+  skillOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
+
   icosahedronMoon.rotation.x += 0.04
   icosahedronMoon2.rotation.x += 0.02
+
+  dodecahedron.rotation.x += 0.004
+  dodecahedron.rotation.y += 0.002
 
   box2Obj.rotation.y += 0.01
   box3Obj.rotation.x += 0.003
