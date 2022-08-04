@@ -64,9 +64,21 @@ function init() {
   // const control = new OrbitControls(camera, renderer.domElement)
 
   camera.position.set(0, 0, 10)
-  // control.update
 
-  const skyBox = new THREE.CubeTextureLoader()
+  let loadingContainer = document.querySelector('.loading-container')
+  let progress = document.getElementById('progress')
+
+  const loadingManager = new THREE.LoadingManager()
+
+  loadingManager.onLoad = function () {
+    loadingContainer.style.display = 'none'
+  };
+
+  loadingManager.onProgress = function (url, itemsLoaded, itemsTotal) {
+    progress.innerHTML = Math.round((itemsLoaded / itemsTotal) * 100)
+  };
+
+  const skyBox = new THREE.CubeTextureLoader(loadingManager)
     .load([
       skyTop,
       skyBottom,
@@ -208,9 +220,6 @@ function init() {
   skillPython.position.set(2, 0, -4);
   skillOrbit.add(skillPython);
 
-
-
-
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   box = new THREE.Mesh(boxGeo, boxMat)
@@ -305,7 +314,6 @@ function init() {
 
   scene.fog = new THREE.FogExp2(0x222222, 0.04)
 
-
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
@@ -357,13 +365,11 @@ function animate() {
   box3Obj.rotation.x += 0.003
   box3Obj.rotation.y += 0.003
 
-
   target.x = (1 - mouse.x) * 0.0004;
   target.y = (1 - mouse.y) * 0.0004;
 
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
-
 
   requestAnimationFrame(animate)
   renderer.render(scene, camera)

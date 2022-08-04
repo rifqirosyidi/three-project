@@ -3,18 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <style>
-      body {
-        margin: 0;
-      }
-      canvas {
-        width: 100vw !important;
-        height: 100vh !important;
-      }
-    </style>
+    <title>Rief Planetary System</title>
+    <link rel="stylesheet" href="styles/style.css" />
   </head>
   <body>
+    <div class="loading-container">
+      <div class="loading">
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+      <div class="loading-progress">
+        <div>generating planets...</div>
+        <div>
+          <span id="progress">0</span>
+          <span>%</span>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/scripts/main.js"></script>
   </body>
 </html>
