@@ -51,10 +51,21 @@ let box,
   skillOrbit,
   smallSphere,
   sphere,
+  dodecahedron,
+  dodecahedron2,
+  dodecahedron3,
+  workBox,
   book;
 
 // navigation
-let isAuto = false, isBack = false;
+let isAuto = false, isBack = false, isNext = false, isPrev = false;
+
+let nextZPos, prevZPos;
+
+const auto = document.querySelector('.auto')
+const next = document.querySelector('.next')
+const prev = document.querySelector('.prev')
+const back = document.querySelector('.back')
 
 init()
 animate()
@@ -118,47 +129,47 @@ function init() {
   const hiText = generateText({
     text: "hi, i am",
     size: 0.15,
-    position: [0, 3, 18]
+    position: [0, 3, 20]
   })
   scene.add(hiText)
 
   const nameText = generateText({
     text: "Rifqi Rosyidi",
     size: 0.5,
-    position: [0, 2, 18]
+    position: [0, 2, 20]
   });
   scene.add(nameText);
 
   const bioText = generateText({
     text: "Web Developer, Designer",
     size: 0.15,
-    position: [0, -2, 18]
+    position: [0, -2, 20]
   });
   scene.add(bioText);
 
   const aboutText = generateText({
     text: "About",
     size: 0.4,
-    position: [0, 3, 38]
+    position: [0, 3, 40]
   });
   scene.add(aboutText);
 
   const aboutDescription = generateText({
     text: `Hi, I am Rifqi, i'm 24. \nWhile I'm a proficient Full-Stack Developer,\nMy expertise is in Front End Development Such as HTML/CSS,\nResponsive Design, UI Design, React.js, Gatsby.js, Three, etc`,
     size: 0.15,
-    position: [0, 2, 38]
+    position: [0, 2, 40]
   });
   scene.add(aboutDescription);
 
   const skillText = generateText({
     text: "Skill Cloud",
     size: 0.4,
-    position: [0, 4.2, 58]
+    position: [0, 4.2, 60]
   });
   scene.add(skillText);
 
   skillOrbit = new THREE.Object3D()
-  skillOrbit.position.set(1.75, -1, 58)
+  skillOrbit.position.set(1.75, -1, 60)
   skillOrbit.rotation.z = 30 * Math.PI / 180
 
   scene.add(skillOrbit)
@@ -226,9 +237,30 @@ function init() {
   const workText = generateText({
     text: "Work & Projects",
     size: 0.4,
-    position: [0, 3, 78]
+    position: [0, 3, 80]
   });
   scene.add(workText);
+
+  const workDescription = generateText({
+    text: "Here's the list of projects & works\nthat i'v done",
+    size: 0.15,
+    position: [0, 2, 80]
+  });
+  scene.add(workDescription);
+
+  const workQuran = generateText({
+    text: "Project - Quranin",
+    size: 0.3,
+    position: [0, 3, 100]
+  });
+  scene.add(workQuran);
+
+  const workQuranDesc = generateText({
+    text: "Simple Quran App\nInspired from quranly mobile",
+    size: 0.15,
+    position: [0, 2, 100]
+  });
+  scene.add(workQuranDesc);
 
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
@@ -279,15 +311,15 @@ function init() {
   const icosahedronMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   icosahedron = new THREE.Mesh(icosahedronGeo, icosahedronMat)
   scene.add(icosahedron)
-  icosahedron.position.z = 38
+  icosahedron.position.z = 40
   icosahedron.position.y = -1
 
   icosahedronOrbit = new THREE.Object3D()
-  icosahedronOrbit.position.set(0, -1, 38)
+  icosahedronOrbit.position.set(0, -1, 40)
   icosahedronOrbit.rotation.z = 45 * Math.PI / 180
 
   icosahedronOrbit2 = new THREE.Object3D()
-  icosahedronOrbit2.position.set(0, -1, 38)
+  icosahedronOrbit2.position.set(0, -1, 40)
   icosahedronOrbit2.rotation.z = 35 * Math.PI / 180
 
   const icosahedronMoonGeo = new THREE.IcosahedronGeometry(0.1)
@@ -301,21 +333,49 @@ function init() {
   icosahedronMoon.position.x = 3
   icosahedronMoon2.position.x = -2
 
-  const sphereSmallGeo = new THREE.SphereGeometry(0.2, 25, 25)
+  const sphereSmallGeo = new THREE.SphereGeometry(0.1, 25, 25)
   const sphereSmallMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   smallSphere = new THREE.Mesh(sphereSmallGeo, sphereSmallMat)
   scene.add(smallSphere)
-  smallSphere.position.set(0, 0, 58)
+  smallSphere.position.set(0, 0, 60)
 
-  const sphereGeo = new THREE.SphereGeometry(1, 10, 10)
-  const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
-  sphere = new THREE.Mesh(sphereGeo, sphereMat)
-  scene.add(sphere)
-  sphere.position.set(0, 0, 58)
+  // const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8)
+  // const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
+  // sphere = new THREE.Mesh(sphereGeo, sphereMat)
+  // scene.add(sphere)
+  // sphere.position.set(0, 0, 60)
+
+
+  const dodecahedronGeo = new THREE.DodecahedronGeometry()
+  const dodecahedronMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  dodecahedron = new THREE.Mesh(dodecahedronGeo, dodecahedronMesh)
+
+  const dodecahedron2Geo = new THREE.DodecahedronGeometry(0.3)
+  const dodecahedron2Mesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  dodecahedron2 = new THREE.Mesh(dodecahedron2Geo, dodecahedron2Mesh)
+
+  const dodecahedron3Geo = new THREE.DodecahedronGeometry(0.14)
+  const dodecahedron3Mesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  dodecahedron3 = new THREE.Mesh(dodecahedron3Geo, dodecahedron3Mesh)
+
+  // dodecahedron.position.set(0, 0, 80)
+  workBox = new THREE.Group()
+  workBox.add(dodecahedron)
+  workBox.add(dodecahedron2)
+
+  dodecahedron2.add(dodecahedron3)
+  dodecahedron3.position.x = 1
+
+
+  workBox.rotateZ(0.25)
+  dodecahedron.position.x = -1
+  dodecahedron2.position.x = 5
+
+  scene.add(workBox)
+  workBox.position.set(0, -2, 80)
 
 
   const bookMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
-
   const book1Geo = new THREE.BoxGeometry(0.1, 1, 0.75)
   const book1 = new THREE.Mesh(book1Geo, bookMesh)
   book1.rotation.y = -45 * Math.PI / 180
@@ -330,7 +390,7 @@ function init() {
   book.add(book2)
 
   scene.add(book)
-  book.position.z = 98
+  book.position.z = 100
   book.rotation.x = -55 * Math.PI / 180
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
@@ -351,13 +411,12 @@ function init() {
   scene.fog = new THREE.FogExp2(0x222222, 0.04)
 
   // Navigation
-  const auto = document.querySelector('.auto')
-  const next = document.querySelector('.next')
-  const prev = document.querySelector('.prev')
-  const back = document.querySelector('.back')
+
 
   auto.addEventListener('click', autoNavigation, false)
   back.addEventListener('click', backNavigation, false)
+  next.addEventListener('click', nextNavigation, false)
+  prev.addEventListener('click', prevNavigation, false)
 
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -405,23 +464,51 @@ function animate() {
   smallSphere.rotation.x += 0.004
   smallSphere.rotation.y += 0.002
 
-  sphere.rotation.x += 0.004
-  sphere.rotation.y += 0.002
+  // sphere.rotation.x += 0.004
+  // sphere.rotation.y += 0.002
 
   box2Obj.rotation.y += 0.01
   box3Obj.rotation.x += 0.003
   box3Obj.rotation.y += 0.003
 
+  dodecahedron.rotation.x += 0.004
+  dodecahedron.rotation.y += 0.004
+
+  dodecahedron2.rotation.y += 0.03
+
+  workBox.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
+
   target.x = (1 - mouse.x) * 0.0004;
   target.y = (1 - mouse.y) * 0.0004;
 
-  book.rotation.z += 0.02
+  book.rotation.z += 0.003
 
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
 
   if (isAuto) {
     camera.position.z += 0.025
+  }
+
+  if (isNext && nextZPos !== undefined) {
+    if (camera.position.z > nextZPos) {
+      isNext = false
+      next.classList.remove('active')
+    } else {
+      camera.position.z += 0.04
+    }
+  }
+
+  // console.log(prevZPos)
+  // console.log(camera.position.z)
+
+  if (isPrev && prevZPos !== undefined) {
+    if (camera.position.z <= prevZPos) {
+      isPrev = false
+      prev.classList.remove('active')
+    } else {
+      camera.position.z -= 0.04
+    }
   }
 
   if (isBack) {
@@ -438,18 +525,60 @@ function animate() {
 
 function autoNavigation(event) {
   isAuto = !isAuto
+
+  if (auto.classList.contains('active')) {
+    auto.classList.remove('active')
+  } else {
+    auto.classList.add('active')
+  }
+}
+
+
+const positionArray = [10, 25, 45, 65, 85, 105]
+
+function findNextZPosition(currNum) {
+  for (const num of positionArray) {
+    if (num > currNum) return num;
+  }
+  return currNum
+}
+
+function findPrevZPosition(currNum) {
+  const reversed = positionArray.reverse()
+  for (const num of reversed) {
+    if (num < currNum) return num;
+  }
+  return currNum
 }
 
 function nextNavigation(event) {
+  next.classList.add('active')
+  let currentZposition = camera.position.z
+  nextZPos = findNextZPosition(currentZposition)
 
+  if (currentZposition < nextZPos) {
+    isNext = true
+  }
 }
 
 function prevNavigation(event) {
+  let currentZposition = camera.position.z
+  prevZPos = findPrevZPosition(currentZposition)
 
+  if (currentZposition > prevZPos) {
+    prev.classList.add('active')
+    isPrev = true
+  }
 }
 
 function backNavigation(event) {
   isBack = !isBack
+
+  if (back.classList.contains('active')) {
+    back.classList.remove('active')
+  } else {
+    back.classList.add('active')
+  }
 }
 
 function onMouseMove(event) {

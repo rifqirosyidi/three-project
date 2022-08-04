@@ -6,6 +6,10 @@ canvas {
   height: 100vh !important;
 }
 
+.active i {
+  color: yellow !important;
+}
+
 .loading-container {
   position: absolute;
   top: 0;
@@ -135,7 +139,12 @@ canvas {
   color: white;
   font-size: 0.8rem;
   display: flex;
-  gap: 0 40px;
+  gap: 0 20px;
   justify-content: center;
   margin-bottom: 20px;
+}
+
+.container-navigation div {
+  padding: 10px;
+  cursor: pointer;
 }
