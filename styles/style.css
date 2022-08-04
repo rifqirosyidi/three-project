@@ -123,3 +123,19 @@ canvas {
     transform: scale(1);
   }
 }
+
+.navigation {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.container-navigation {
+  color: white;
+  font-size: 0.8rem;
+  display: flex;
+  gap: 0 40px;
+  justify-content: center;
+  margin-bottom: 20px;
+}

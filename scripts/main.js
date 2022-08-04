@@ -49,8 +49,12 @@ let box,
   icosahedronOrbit2,
   icosahedronMoon2,
   skillOrbit,
+  smallSphere,
   sphere,
   book;
+
+// navigation
+let isAuto = false, isBack = false;
 
 init()
 animate()
@@ -124,7 +128,6 @@ function init() {
     position: [0, 2, 18]
   });
   scene.add(nameText);
-
 
   const bioText = generateText({
     text: "Web Developer, Designer",
@@ -298,19 +301,26 @@ function init() {
   icosahedronMoon.position.x = 3
   icosahedronMoon2.position.x = -2
 
+  const sphereSmallGeo = new THREE.SphereGeometry(0.2, 25, 25)
+  const sphereSmallMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  smallSphere = new THREE.Mesh(sphereSmallGeo, sphereSmallMat)
+  scene.add(smallSphere)
+  smallSphere.position.set(0, 0, 58)
+
   const sphereGeo = new THREE.SphereGeometry(1, 10, 10)
-  const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
   sphere = new THREE.Mesh(sphereGeo, sphereMat)
   scene.add(sphere)
   sphere.position.set(0, 0, 58)
 
+
   const bookMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
 
-  const book1Geo = new THREE.BoxGeometry(0.20, 1, 0.75)
+  const book1Geo = new THREE.BoxGeometry(0.1, 1, 0.75)
   const book1 = new THREE.Mesh(book1Geo, bookMesh)
   book1.rotation.y = -45 * Math.PI / 180
 
-  const book2Geo = new THREE.BoxGeometry(0.20, 1, 0.75)
+  const book2Geo = new THREE.BoxGeometry(0.1, 1, 0.75)
   const book2 = new THREE.Mesh(book2Geo, bookMesh)
   book2.position.x = 0.40
   book2.rotation.y = 45 * Math.PI / 180
@@ -340,13 +350,21 @@ function init() {
 
   scene.fog = new THREE.FogExp2(0x222222, 0.04)
 
+  // Navigation
+  const auto = document.querySelector('.auto')
+  const next = document.querySelector('.next')
+  const prev = document.querySelector('.prev')
+  const back = document.querySelector('.back')
+
+  auto.addEventListener('click', autoNavigation, false)
+  back.addEventListener('click', backNavigation, false)
+
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
   document.addEventListener('mousemove', onMouseMove, false);
   document.addEventListener('wheel', onMouseWheel, false);
   window.addEventListener('resize', onResize, false);
-
 }
 
 
@@ -384,6 +402,9 @@ function animate() {
   icosahedronMoon.rotation.x += 0.04
   icosahedronMoon2.rotation.x += 0.02
 
+  smallSphere.rotation.x += 0.004
+  smallSphere.rotation.y += 0.002
+
   sphere.rotation.x += 0.004
   sphere.rotation.y += 0.002
 
@@ -394,13 +415,42 @@ function animate() {
   target.x = (1 - mouse.x) * 0.0004;
   target.y = (1 - mouse.y) * 0.0004;
 
+  book.rotation.z += 0.02
+
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
+
+  if (isAuto) {
+    camera.position.z += 0.025
+  }
+
+  if (isBack) {
+    if (camera.position.z < 10) {
+      isBack = false
+    } else {
+      camera.position.z -= 0.025
+    }
+  }
 
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
 }
 
+function autoNavigation(event) {
+  isAuto = !isAuto
+}
+
+function nextNavigation(event) {
+
+}
+
+function prevNavigation(event) {
+
+}
+
+function backNavigation(event) {
+  isBack = !isBack
+}
 
 function onMouseMove(event) {
   mouse.x = (event.clientX - windowHalf.x);
