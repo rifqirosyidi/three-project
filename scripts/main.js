@@ -48,9 +48,9 @@ let box,
   icosahedronMoon,
   icosahedronOrbit2,
   icosahedronMoon2,
-  dodecahedron
-
-let skillOrbit, skillHtml;
+  skillOrbit,
+  sphere,
+  book;
 
 init()
 animate()
@@ -63,7 +63,7 @@ function init() {
   renderer.shadowMap.enabled = true
   // const control = new OrbitControls(camera, renderer.domElement)
 
-  camera.position.set(0, 0, 10)
+  camera.position.set(0, 0, 105)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
@@ -220,6 +220,13 @@ function init() {
   skillPython.position.set(2, 0, -4);
   skillOrbit.add(skillPython);
 
+  const workText = generateText({
+    text: "Work & Projects",
+    size: 0.4,
+    position: [0, 3, 78]
+  });
+  scene.add(workText);
+
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   box = new THREE.Mesh(boxGeo, boxMat)
@@ -291,11 +298,30 @@ function init() {
   icosahedronMoon.position.x = 3
   icosahedronMoon2.position.x = -2
 
-  const dodecahedronGeo = new THREE.TetrahedronGeometry(0.5)
-  const dodecahedronMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
-  dodecahedron = new THREE.Mesh(dodecahedronGeo, dodecahedronMat)
-  scene.add(dodecahedron)
-  dodecahedron.position.set(0, 0, 58)
+  const sphereGeo = new THREE.SphereGeometry(1, 10, 10)
+  const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  sphere = new THREE.Mesh(sphereGeo, sphereMat)
+  scene.add(sphere)
+  sphere.position.set(0, 0, 58)
+
+  const bookMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+
+  const book1Geo = new THREE.BoxGeometry(0.20, 1, 0.75)
+  const book1 = new THREE.Mesh(book1Geo, bookMesh)
+  book1.rotation.y = -45 * Math.PI / 180
+
+  const book2Geo = new THREE.BoxGeometry(0.20, 1, 0.75)
+  const book2 = new THREE.Mesh(book2Geo, bookMesh)
+  book2.position.x = 0.40
+  book2.rotation.y = 45 * Math.PI / 180
+
+  book = new THREE.Group()
+  book.add(book1)
+  book.add(book2)
+
+  scene.add(book)
+  book.position.z = 98
+  book.rotation.x = -55 * Math.PI / 180
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
@@ -358,8 +384,8 @@ function animate() {
   icosahedronMoon.rotation.x += 0.04
   icosahedronMoon2.rotation.x += 0.02
 
-  dodecahedron.rotation.x += 0.004
-  dodecahedron.rotation.y += 0.002
+  sphere.rotation.x += 0.004
+  sphere.rotation.y += 0.002
 
   box2Obj.rotation.y += 0.01
   box3Obj.rotation.x += 0.003
