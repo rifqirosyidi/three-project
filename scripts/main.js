@@ -1,8 +1,13 @@
 import * as THREE from "three";
 import { CameraHelper } from "three";
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
-import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer"
 import { generateText, makeTextSprite } from "./utils.js";
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { LuminosityShader } from 'three/examples/jsm/shaders/LuminosityShader.js';
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 
 const skyLeft = new URL('/images/skybox/left.png', import.meta.url).href
 const skyRight = new URL('/images/skybox/right.png', import.meta.url).href
@@ -11,13 +16,12 @@ const skyBottom = new URL('/images/skybox/bottom.png', import.meta.url).href
 const skyFront = new URL('/images/skybox/front.png', import.meta.url).href
 const skyBack = new URL('/images/skybox/back.png', import.meta.url).href
 
-let camera, scene, renderer, raycaster, mousePosition, sphereId;
+let camera, scene, renderer, composer, bloomPass, renderPass, fxaaPass, luminosityPass;
 
 const clock = new THREE.Clock()
 const mouse = new THREE.Vector2();
 const target = new THREE.Vector2();
 const windowHalf = new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2);
-
 
 const options = {
   sphereColor: '#ffeaee',
@@ -43,6 +47,7 @@ let box,
   octaOrbit,
   octaMoon,
   octaOrbit2,
+  octaOrbit3,
   octaMoon2,
   icosahedron,
   icosahedronOrbit,
@@ -57,7 +62,11 @@ let box,
   workBox,
   book,
   sphere,
-  sphereOrbit;
+  sphereOrbit,
+  octahedron2,
+  octahedron3,
+  octahedron4
+  ;
 
 // navigation
 let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false;
@@ -77,7 +86,30 @@ function init() {
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 20)
 
   renderer.shadowMap.enabled = true
+  renderer.setPixelRatio(window.devicePixelRatio);
+
+  renderPass = new RenderPass(scene, camera)
+  // renderPass.clearColor = new THREE.Color(0, 0, 0);
+  // renderPass.clearAlpha = 0;
+
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0, 0);
+  fxaaPass = new ShaderPass(FXAAShader);
+  luminosityPass = new ShaderPass(LuminosityShader);
+
+  composer = new EffectComposer(renderer);
+  composer.setSize(window.innerWidth, window.innerHeight)
+
+  const pixelRatio = renderer.getPixelRatio();
+
+  fxaaPass.material.uniforms['resolution'].value.x = 1 / (window.innerWidth * pixelRatio);
+  fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * pixelRatio);
+
+  composer.addPass(luminosityPass);
   // const control = new OrbitControls(camera, renderer.domElement)
+
+  composer.addPass(renderPass);
+  composer.addPass(fxaaPass)
+  composer.addPass(bloomPass);
 
   camera.position.set(0, 0, 10)
 
@@ -291,6 +323,55 @@ function init() {
   });
   scene.add(workRecipeDesc);
 
+  const endText = generateText({
+    text: "Thank you for exploring.\nYou've now outside Rief Planetary-System\nWe're now heading towards Rief Star-System",
+    size: 0.2,
+    position: [0, 0, 170]
+  });
+  scene.add(endText);
+
+  const warpText = generateText({
+    text: "Warp Drive Sequence\nWill be Activated",
+    size: 0.2,
+    position: [0, 0, 190]
+  });
+  scene.add(warpText);
+  const warp3 = generateText({
+    text: "3",
+    size: 0.2,
+    position: [0, 0, 195]
+  });
+  scene.add(warp3);
+  const warp2 = generateText({
+    text: "2",
+    size: 0.2,
+    position: [0, 0, 200]
+  });
+  scene.add(warp2);
+  const warp1 = generateText({
+    text: "1",
+    size: 0.2,
+    position: [0, 0, 205]
+  });
+  scene.add(warp1);
+
+  const vertices = [];
+
+  for (let i = 0; i < 15000; i++) {
+    const x = THREE.MathUtils.randFloatSpread(120);
+    const y = THREE.MathUtils.randFloatSpread(120);
+    const z = THREE.MathUtils.randFloatSpread(2000);
+    vertices.push(x, y, z);
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+
+  const material = new THREE.PointsMaterial({ size: 0.02, color: 0xffffff });
+  const points = new THREE.Points(geometry, material);
+
+  scene.add(points);
+
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   box = new THREE.Mesh(boxGeo, boxMat)
@@ -415,13 +496,10 @@ function init() {
   book.position.z = 100
   book.rotation.x = -55 * Math.PI / 180
 
-  const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8)
-  const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
-  sphere = new THREE.Mesh(sphereGeo, sphereMat)
-  scene.add(sphere)
 
-  const blackSphereGeo = new THREE.SphereGeometry(0.15, 20, 20)
-  const blackSphereMat = new THREE.MeshStandardMaterial({ color: 0x504A4B })
+
+  const blackSphereGeo = new THREE.SphereGeometry(1, 10, 10)
+  const blackSphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
   const blackSphere = new THREE.Mesh(blackSphereGeo, blackSphereMat)
 
   sphereOrbit = new THREE.Object3D()
@@ -429,12 +507,30 @@ function init() {
   sphereOrbit.rotation.z = 0.25
 
   sphereOrbit.add(blackSphere)
-  sphereOrbit.add(sphere)
-
-  sphere.position.x = 3
-
   scene.add(sphereOrbit)
 
+
+  octaOrbit3 = new THREE.Group()
+  octaOrbit3.position.set(0, -1, 140)
+
+  const octahedron2Geo = new THREE.OctahedronGeometry(0.2)
+  const octahedron2Mat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  octahedron2 = new THREE.Mesh(octahedron2Geo, octahedron2Mat)
+  octaOrbit3.add(octahedron2)
+
+  const octahedron3Geo = new THREE.OctahedronGeometry(0.2)
+  const octahedron3Mat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  octahedron3 = new THREE.Mesh(octahedron3Geo, octahedron3Mat)
+  octahedron3.position.x = 2
+  octaOrbit3.add(octahedron3)
+
+  const octahedron4Geo = new THREE.OctahedronGeometry(0.2)
+  const octahedron4Mat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  octahedron4 = new THREE.Mesh(octahedron4Geo, octahedron4Mat)
+  octahedron4.position.x = -2
+  octaOrbit3.add(octahedron4)
+
+  scene.add(octaOrbit3)
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
@@ -507,8 +603,6 @@ function animate() {
   smallSphere.rotation.x += 0.004
   smallSphere.rotation.y += 0.002
 
-
-
   box2Obj.rotation.y += 0.01
   box3Obj.rotation.x += 0.003
   box3Obj.rotation.y += 0.003
@@ -525,33 +619,34 @@ function animate() {
 
   book.rotation.z += 0.003
 
-  sphere.rotation.x += 0.004
-  sphere.rotation.y += 0.002
-
   sphereOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
+
+  octaOrbit3.rotation.y += 0.004
 
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
 
+  // faster travel
   if (isFastNext) {
-    if (camera.fov > 40) {
-      camera.fov -= 0.2
+    if (camera.fov < 100) {
+      camera.fov += 0.2
       camera.updateProjectionMatrix()
     }
     camera.position.z += 0.1
   } else if (isFastPrev && camera.position.z > 10) {
-    if (camera.fov > 40) {
+    if (camera.fov > 75) {
       camera.fov -= 0.2
       camera.updateProjectionMatrix()
     }
     camera.position.z -= 0.1
   } else {
-    if (camera.fov < 75) {
-      camera.fov += 0.2
+    if (camera.fov > 75) {
+      camera.fov -= 0.2
       camera.updateProjectionMatrix()
     }
   }
 
+  // slow travel
   if (isSlowNext) {
     camera.position.z += 0.02
   }
@@ -560,9 +655,26 @@ function animate() {
     camera.position.z -= 0.02
   }
 
+  // warp drive
+  if (camera.position.z > 210 && camera.position.z < 600) {
+    if (camera.fov < 170) {
+      camera.fov += 0.4
+      camera.updateProjectionMatrix()
+    }
+    camera.position.z += 0.5
+  } else {
+    if (camera.fov > 75) {
+      camera.fov -= 0.4
+      camera.updateProjectionMatrix()
+    }
+  }
+
+
+
+
 
   requestAnimationFrame(animate)
-  renderer.render(scene, camera)
+  composer.render()
 }
 
 function fastNextNavigation(event) {
