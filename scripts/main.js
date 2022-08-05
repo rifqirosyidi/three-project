@@ -79,7 +79,7 @@ function init() {
   renderer.shadowMap.enabled = true
   // const control = new OrbitControls(camera, renderer.domElement)
 
-  camera.position.set(0, 0, 150)
+  camera.position.set(0, 0, 10)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
