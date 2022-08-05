@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { CameraHelper } from "three";
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls"
 import { CSS2DObject, CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer"
 import { generateText, makeTextSprite } from "./utils.js";
@@ -50,22 +51,22 @@ let box,
   icosahedronMoon2,
   skillOrbit,
   smallSphere,
-  sphere,
   dodecahedron,
   dodecahedron2,
   dodecahedron3,
   workBox,
-  book;
+  book,
+  sphere,
+  sphereOrbit;
 
 // navigation
-let isAuto = false, isBack = false, isNext = false, isPrev = false;
+let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false;
 
-let nextZPos, prevZPos;
 
-const auto = document.querySelector('.auto')
-const next = document.querySelector('.next')
-const prev = document.querySelector('.prev')
-const back = document.querySelector('.back')
+const fNext = document.querySelector('.fnext')
+const sNext = document.querySelector('.snext')
+const sPrev = document.querySelector('.sprev')
+const fPrev = document.querySelector('.fprev')
 
 init()
 animate()
@@ -78,7 +79,7 @@ function init() {
   renderer.shadowMap.enabled = true
   // const control = new OrbitControls(camera, renderer.domElement)
 
-  camera.position.set(0, 0, 10)
+  camera.position.set(0, 0, 150)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
@@ -262,6 +263,34 @@ function init() {
   });
   scene.add(workQuranDesc);
 
+  const workBlog = generateText({
+    text: "Project - Devtoopia",
+    size: 0.3,
+    position: [0, 3, 120]
+  });
+  scene.add(workBlog);
+
+  const workBlogDesc = generateText({
+    text: "Personal blog for note & writing\narticles about development & design",
+    size: 0.15,
+    position: [0, 2, 120]
+  });
+  scene.add(workBlogDesc);
+
+  const workRecipe = generateText({
+    text: "Project - AnyRecipes",
+    size: 0.3,
+    position: [0, 3, 140]
+  });
+  scene.add(workRecipe);
+
+  const workRecipeDesc = generateText({
+    text: "Simple Recipe App\nBuild using Edamam API",
+    size: 0.15,
+    position: [0, 2, 140]
+  });
+  scene.add(workRecipeDesc);
+
   const boxGeo = new THREE.BoxGeometry()
   const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   box = new THREE.Mesh(boxGeo, boxMat)
@@ -339,13 +368,6 @@ function init() {
   scene.add(smallSphere)
   smallSphere.position.set(0, 0, 60)
 
-  // const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8)
-  // const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
-  // sphere = new THREE.Mesh(sphereGeo, sphereMat)
-  // scene.add(sphere)
-  // sphere.position.set(0, 0, 60)
-
-
   const dodecahedronGeo = new THREE.DodecahedronGeometry()
   const dodecahedronMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
   dodecahedron = new THREE.Mesh(dodecahedronGeo, dodecahedronMesh)
@@ -393,6 +415,27 @@ function init() {
   book.position.z = 100
   book.rotation.x = -55 * Math.PI / 180
 
+  const sphereGeo = new THREE.SphereGeometry(0.5, 8, 8)
+  const sphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
+  sphere = new THREE.Mesh(sphereGeo, sphereMat)
+  scene.add(sphere)
+
+  const blackSphereGeo = new THREE.SphereGeometry(0.15, 20, 20)
+  const blackSphereMat = new THREE.MeshStandardMaterial({ color: 0x504A4B })
+  const blackSphere = new THREE.Mesh(blackSphereGeo, blackSphereMat)
+
+  sphereOrbit = new THREE.Object3D()
+  sphereOrbit.position.set(0, -1, 120)
+  sphereOrbit.rotation.z = 0.25
+
+  sphereOrbit.add(blackSphere)
+  sphereOrbit.add(sphere)
+
+  sphere.position.x = 3
+
+  scene.add(sphereOrbit)
+
+
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
 
@@ -413,10 +456,10 @@ function init() {
   // Navigation
 
 
-  auto.addEventListener('click', autoNavigation, false)
-  back.addEventListener('click', backNavigation, false)
-  next.addEventListener('click', nextNavigation, false)
-  prev.addEventListener('click', prevNavigation, false)
+  fNext.addEventListener('click', fastNextNavigation, false)
+  sNext.addEventListener('click', slowNextNavigation, false)
+  sPrev.addEventListener('click', slowPrevNavigation, false)
+  fPrev.addEventListener('click', fastPrevNavigation, false)
 
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
@@ -464,8 +507,7 @@ function animate() {
   smallSphere.rotation.x += 0.004
   smallSphere.rotation.y += 0.002
 
-  // sphere.rotation.x += 0.004
-  // sphere.rotation.y += 0.002
+
 
   box2Obj.rotation.y += 0.01
   box3Obj.rotation.x += 0.003
@@ -483,101 +525,79 @@ function animate() {
 
   book.rotation.z += 0.003
 
+  sphere.rotation.x += 0.004
+  sphere.rotation.y += 0.002
+
+  sphereOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
+
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
 
-  if (isAuto) {
-    camera.position.z += 0.025
-  }
-
-  if (isNext && nextZPos !== undefined) {
-    if (camera.position.z > nextZPos) {
-      isNext = false
-      next.classList.remove('active')
-    } else {
-      camera.position.z += 0.04
+  if (isFastNext) {
+    if (camera.fov > 40) {
+      camera.fov -= 0.2
+      camera.updateProjectionMatrix()
+    }
+    camera.position.z += 0.1
+  } else if (isFastPrev && camera.position.z > 10) {
+    if (camera.fov > 40) {
+      camera.fov -= 0.2
+      camera.updateProjectionMatrix()
+    }
+    camera.position.z -= 0.1
+  } else {
+    if (camera.fov < 75) {
+      camera.fov += 0.2
+      camera.updateProjectionMatrix()
     }
   }
 
-  // console.log(prevZPos)
-  // console.log(camera.position.z)
-
-  if (isPrev && prevZPos !== undefined) {
-    if (camera.position.z <= prevZPos) {
-      isPrev = false
-      prev.classList.remove('active')
-    } else {
-      camera.position.z -= 0.04
-    }
+  if (isSlowNext) {
+    camera.position.z += 0.02
   }
 
-  if (isBack) {
-    if (camera.position.z < 10) {
-      isBack = false
-    } else {
-      camera.position.z -= 0.025
-    }
+  if (isSlowPrev) {
+    camera.position.z -= 0.02
   }
+
 
   requestAnimationFrame(animate)
   renderer.render(scene, camera)
 }
 
-function autoNavigation(event) {
-  isAuto = !isAuto
-
-  if (auto.classList.contains('active')) {
-    auto.classList.remove('active')
+function fastNextNavigation(event) {
+  isFastNext = !isFastNext
+  if (fNext.classList.contains('active')) {
+    fNext.classList.remove('active')
   } else {
-    auto.classList.add('active')
+    fNext.classList.add('active')
   }
 }
 
-
-const positionArray = [10, 25, 45, 65, 85, 105]
-
-function findNextZPosition(currNum) {
-  for (const num of positionArray) {
-    if (num > currNum) return num;
-  }
-  return currNum
-}
-
-function findPrevZPosition(currNum) {
-  const reversed = positionArray.reverse()
-  for (const num of reversed) {
-    if (num < currNum) return num;
-  }
-  return currNum
-}
-
-function nextNavigation(event) {
-  next.classList.add('active')
-  let currentZposition = camera.position.z
-  nextZPos = findNextZPosition(currentZposition)
-
-  if (currentZposition < nextZPos) {
-    isNext = true
-  }
-}
-
-function prevNavigation(event) {
-  let currentZposition = camera.position.z
-  prevZPos = findPrevZPosition(currentZposition)
-
-  if (currentZposition > prevZPos) {
-    prev.classList.add('active')
-    isPrev = true
-  }
-}
-
-function backNavigation(event) {
-  isBack = !isBack
-
-  if (back.classList.contains('active')) {
-    back.classList.remove('active')
+function slowNextNavigation(event) {
+  isSlowNext = !isSlowNext
+  if (sNext.classList.contains('active')) {
+    sNext.classList.remove('active')
   } else {
-    back.classList.add('active')
+    sNext.classList.add('active')
+  }
+}
+
+function slowPrevNavigation(event) {
+  isSlowPrev = !isSlowPrev
+  if (sPrev.classList.contains('active')) {
+    sPrev.classList.remove('active')
+  } else {
+    sPrev.classList.add('active')
+  }
+}
+
+function fastPrevNavigation(event) {
+  isFastPrev = !isFastPrev
+  if (fPrev.classList.contains('active')) {
+    fPrev.classList.remove('active')
+  } else {
+    fPrev.classList.add('active')
   }
 }
 
