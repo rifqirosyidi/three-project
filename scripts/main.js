@@ -16,7 +16,7 @@ const skyBottom = new URL('/images/skybox/bottom.png', import.meta.url).href
 const skyFront = new URL('/images/skybox/front.png', import.meta.url).href
 const skyBack = new URL('/images/skybox/back.png', import.meta.url).href
 
-let camera, scene, renderer, composer, bloomPass, renderPass, fxaaPass, luminosityPass;
+let camera, scene, renderer, composer, raycaster, pointer, bloomPass, renderPass, fxaaPass, luminosityPass;
 
 const clock = new THREE.Clock()
 const mouse = new THREE.Vector2();
@@ -65,11 +65,14 @@ let box,
   sphereOrbit,
   octahedron2,
   octahedron3,
-  octahedron4
-  ;
+  octahedron4,
+  ring;
 
 // navigation
-let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false;
+let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false, warpDriveEnabled = false;
+let cameraSpeed;
+
+let gateWarp1Id;
 
 
 const fNext = document.querySelector('.fnext')
@@ -85,12 +88,13 @@ function init() {
   scene = new THREE.Scene()
   camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 20)
 
+  raycaster = new THREE.Raycaster();
+  pointer = new THREE.Vector2();
+
   renderer.shadowMap.enabled = true
   renderer.setPixelRatio(window.devicePixelRatio);
 
   renderPass = new RenderPass(scene, camera)
-  // renderPass.clearColor = new THREE.Color(0, 0, 0);
-  // renderPass.clearAlpha = 0;
 
   bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0, 0);
   fxaaPass = new ShaderPass(FXAAShader);
@@ -105,13 +109,12 @@ function init() {
   fxaaPass.material.uniforms['resolution'].value.y = 1 / (window.innerHeight * pixelRatio);
 
   composer.addPass(luminosityPass);
-  // const control = new OrbitControls(camera, renderer.domElement)
 
   composer.addPass(renderPass);
   composer.addPass(fxaaPass)
   composer.addPass(bloomPass);
 
-  camera.position.set(0, 0, 10)
+  camera.position.set(0, 0, 199)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
@@ -331,29 +334,33 @@ function init() {
   scene.add(endText);
 
   const warpText = generateText({
-    text: "Warp Drive Sequence\nWill be Activated",
+    text: "Warp Drive",
     size: 0.2,
-    position: [0, 0, 190]
+    position: [0, 2.5, 190]
   });
   scene.add(warpText);
-  const warp3 = generateText({
-    text: "3",
-    size: 0.2,
-    position: [0, 0, 195]
+
+  const warpDriveDesc = generateText({
+    text: "Please click entrance below to enable warp drive",
+    size: 0.1,
+    position: [0, 2, 190]
   });
-  scene.add(warp3);
-  const warp2 = generateText({
-    text: "2",
-    size: 0.2,
-    position: [0, 0, 200]
+  scene.add(warpDriveDesc);
+
+  const welcomeStarText = generateText({
+    text: "welcome to",
+    size: 0.25,
+    position: [0, 4, 590]
+  })
+  scene.add(welcomeStarText)
+
+  const greetingStarText = generateText({
+    text: "Rief Star-System",
+    size: 0.5,
+    position: [0, 3, 590]
   });
-  scene.add(warp2);
-  const warp1 = generateText({
-    text: "1",
-    size: 0.2,
-    position: [0, 0, 205]
-  });
-  scene.add(warp1);
+  scene.add(greetingStarText);
+
 
   const vertices = [];
 
@@ -532,6 +539,19 @@ function init() {
 
   scene.add(octaOrbit3)
 
+  const sphereGeo = new THREE.SphereGeometry(0.2, 20, 20)
+  const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffe4ce })
+  sphere = new THREE.Mesh(sphereGeo, sphereMat)
+  scene.add(sphere)
+  sphere.position.set(0, 0, 190)
+  gateWarp1Id = sphere.id
+
+  const starGeo = new THREE.OctahedronGeometry(2)
+  const starMat = new THREE.MeshBasicMaterial(0xffffff)
+  const star = new THREE.Mesh(starGeo, starMat)
+  scene.add(star)
+  star.position.z = 580
+
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
 
@@ -560,11 +580,27 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
+  document.addEventListener('mousedown', onMouseDown, false)
   document.addEventListener('mousemove', onMouseMove, false);
   document.addEventListener('wheel', onMouseWheel, false);
   window.addEventListener('resize', onResize, false);
 }
 
+function onMouseDown() {
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  if (intersects.length > 0) {
+    console.log("INTERSECT")
+    console.log(intersects)
+    if (intersects[0].object.id === gateWarp1Id) {
+      intersects[0].object.material.color.set(0x000000)
+      warpDriveEnabled = true
+      cameraSpeed = 0.5
+    }
+
+  }
+}
 
 function animate() {
   uniforms.u_time.value = clock.getElapsedTime()
@@ -623,11 +659,13 @@ function animate() {
 
   octaOrbit3.rotation.y += 0.004
 
+
+
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
 
   // faster travel
-  if (isFastNext) {
+  if (isFastNext && camera.position.z < 600) {
     if (camera.fov < 100) {
       camera.fov += 0.2
       camera.updateProjectionMatrix()
@@ -655,23 +693,24 @@ function animate() {
     camera.position.z -= 0.02
   }
 
-  // warp drive
-  if (camera.position.z > 210 && camera.position.z < 600) {
-    if (camera.fov < 170) {
-      camera.fov += 0.4
-      camera.updateProjectionMatrix()
-    }
-    camera.position.z += 0.5
-  } else {
-    if (camera.fov > 75) {
-      camera.fov -= 0.4
-      camera.updateProjectionMatrix()
+  if (warpDriveEnabled) {
+    camera.position.z += cameraSpeed
+
+
+
+    if (camera.position.z > 210 && camera.position.z < 600) {
+      if (camera.fov < 170) {
+        camera.fov += 0.4
+        camera.updateProjectionMatrix()
+      }
+    } else {
+      if (camera.fov > 75) {
+        camera.fov -= 0.4
+        camera.updateProjectionMatrix()
+        warpDriveEnabled = false
+      }
     }
   }
-
-
-
-
 
   requestAnimationFrame(animate)
   composer.render()
@@ -714,6 +753,9 @@ function fastPrevNavigation(event) {
 }
 
 function onMouseMove(event) {
+  pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+  pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
+
   mouse.x = (event.clientX - windowHalf.x);
   mouse.y = (event.clientY - windowHalf.x);
 }
