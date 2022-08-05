@@ -114,7 +114,7 @@ function init() {
   composer.addPass(fxaaPass)
   composer.addPass(bloomPass);
 
-  camera.position.set(0, 0, 199)
+  camera.position.set(0, 0, 10)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
@@ -580,7 +580,7 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  document.addEventListener('mousedown', onMouseDown, false)
+  document.addEventListener('pointerdown', onMouseDown, false)
   document.addEventListener('mousemove', onMouseMove, false);
   document.addEventListener('wheel', onMouseWheel, false);
   window.addEventListener('resize', onResize, false);
