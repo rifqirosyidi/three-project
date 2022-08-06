@@ -134,7 +134,7 @@ function init() {
   composer.addPass(fxaaPass)
   composer.addPass(bloomPass);
 
-  camera.position.set(0, 0, 620)
+  camera.position.set(0, 0, 10)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
