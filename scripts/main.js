@@ -61,18 +61,38 @@ let box,
   dodecahedron3,
   workBox,
   book,
-  sphere,
   sphereOrbit,
   octahedron2,
   octahedron3,
   octahedron4,
-  ring;
+  tetra,
+  tetra2,
+  starGroup,
+  star,
+  star2,
+  star3,
+  star4;
+
+let fb,
+  fbOrbit,
+  instagram,
+  instagramOrbit,
+  linkedin,
+  linkedinOrbit,
+  github,
+  githubOrbit,
+
+  fbId,
+  instagramId,
+  linkedinId,
+  githubId
+  ;
 
 // navigation
-let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false, warpDriveEnabled = false;
+let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false, warpDriveEnabled = false, warpDriveToBeginning = false;
 let cameraSpeed;
 
-let gateWarp1Id;
+let gateWarp1Id, gateWarp2Id;
 
 
 const fNext = document.querySelector('.fnext')
@@ -96,7 +116,7 @@ function init() {
 
   renderPass = new RenderPass(scene, camera)
 
-  bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0, 0);
+  bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.5, 0, 0);
   fxaaPass = new ShaderPass(FXAAShader);
   luminosityPass = new ShaderPass(LuminosityShader);
 
@@ -114,7 +134,7 @@ function init() {
   composer.addPass(fxaaPass)
   composer.addPass(bloomPass);
 
-  camera.position.set(0, 0, 10)
+  camera.position.set(0, 0, 620)
 
   let loadingContainer = document.querySelector('.loading-container')
   let progress = document.getElementById('progress')
@@ -140,6 +160,15 @@ function init() {
     ]);
 
   scene.background = skyBox
+
+  const textureLoader = new THREE.TextureLoader(loadingManager)
+  const sunTexture = new URL("/images/sunmap.jpg", import.meta.url).href;
+  const socialFb = new URL("/images/social/fb.png", import.meta.url).href;
+  const socialGithub = new URL("/images/social/github.png", import.meta.url).href;
+  const socialInstagram = new URL("/images/social/instagram.png", import.meta.url).href;
+  const socialLinkedin = new URL("/images/social/linkedin.png", import.meta.url).href;
+
+
 
   const welcomeText = generateText({
     text: "welcome to",
@@ -327,7 +356,7 @@ function init() {
   scene.add(workRecipeDesc);
 
   const endText = generateText({
-    text: "Thank you for exploring.\nYou've now outside Rief Planetary-System\nWe're now heading towards Rief Star-System",
+    text: "You've now outside Rief Planetary-System\nWe're now heading towards Rief Binary Star-System",
     size: 0.2,
     position: [0, 0, 170]
   });
@@ -348,18 +377,46 @@ function init() {
   scene.add(warpDriveDesc);
 
   const welcomeStarText = generateText({
-    text: "welcome to",
+    text: "Welcome to",
     size: 0.25,
     position: [0, 4, 590]
   })
   scene.add(welcomeStarText)
 
   const greetingStarText = generateText({
-    text: "Rief Star-System",
+    text: "Rief Binary Star-System",
     size: 0.5,
     position: [0, 3, 590]
   });
   scene.add(greetingStarText);
+
+  const exploreThe = generateText({
+    text: "Explore the",
+    size: 0.25,
+    position: [0, 4, 610]
+  })
+  scene.add(exploreThe)
+
+  const socialCluster = generateText({
+    text: "Social-Med Cluster",
+    size: 0.5,
+    position: [0, 3, 610]
+  });
+  scene.add(socialCluster);
+
+  const backToPlanetary = generateText({
+    text: "Back to Beginning",
+    size: 0.25,
+    position: [0, 4, 630]
+  })
+  scene.add(backToPlanetary)
+
+  const backToStart = generateText({
+    text: "Warp Drive to Planetary",
+    size: 0.5,
+    position: [0, 3, 630]
+  });
+  scene.add(backToStart);
 
 
   const vertices = [];
@@ -376,17 +433,20 @@ function init() {
 
   const material = new THREE.PointsMaterial({ size: 0.02, color: 0xffffff });
   const points = new THREE.Points(geometry, material);
-
   scene.add(points);
 
-  const boxGeo = new THREE.BoxGeometry()
-  const boxMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const planetaryMaterial = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const solidWhiteMaterial = new THREE.MeshBasicMaterial(0xffffff)
+  const starMaterial = new THREE.MeshBasicMaterial({ map: textureLoader.load(sunTexture) })
+
+  const boxGeo = new THREE.BoxBufferGeometry()
+  const boxMat = planetaryMaterial
   box = new THREE.Mesh(boxGeo, boxMat)
   scene.add(box)
 
   box2Obj = new THREE.Object3D()
-  const box2Geo = new THREE.BoxGeometry(0.3, 0.3, 0.3)
-  const box2Mat = new THREE.MeshPhongMaterial({ color: 0x605A5b, shininess: 100, reflectivity: 100 })
+  const box2Geo = new THREE.BoxBufferGeometry(0.3, 0.3, 0.3)
+  const box2Mat = planetaryMaterial
   box2 = new THREE.Mesh(box2Geo, box2Mat)
   box3 = box2.clone()
 
@@ -401,8 +461,8 @@ function init() {
   box3.position.y = 6
   scene.add(box3Obj)
 
-  const octaGeo = new THREE.OctahedronGeometry()
-  const octaMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const octaGeo = new THREE.OctahedronBufferGeometry()
+  const octaMat = planetaryMaterial
   octahedron = new THREE.Mesh(octaGeo, octaMat)
   scene.add(octahedron)
   octahedron.position.set(0, 0, 15)
@@ -412,7 +472,7 @@ function init() {
   octaOrbit.position.set(0, 0, 15)
   octaOrbit2.position.set(0, 0, 15)
 
-  const octaMoonGeo = new THREE.OctahedronGeometry(0.2)
+  const octaMoonGeo = new THREE.OctahedronBufferGeometry(0.2)
   octaMoon = new THREE.Mesh(octaMoonGeo, octaMat)
   octaMoon2 = octaMoon.clone()
 
@@ -424,8 +484,8 @@ function init() {
   octaMoon.position.x = 5
   octaMoon2.position.x = 3.5
 
-  const icosahedronGeo = new THREE.IcosahedronGeometry(0.5)
-  const icosahedronMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const icosahedronGeo = new THREE.IcosahedronBufferGeometry(0.5)
+  const icosahedronMat = planetaryMaterial
   icosahedron = new THREE.Mesh(icosahedronGeo, icosahedronMat)
   scene.add(icosahedron)
   icosahedron.position.z = 40
@@ -439,7 +499,7 @@ function init() {
   icosahedronOrbit2.position.set(0, -1, 40)
   icosahedronOrbit2.rotation.z = 35 * Math.PI / 180
 
-  const icosahedronMoonGeo = new THREE.IcosahedronGeometry(0.1)
+  const icosahedronMoonGeo = new THREE.IcosahedronBufferGeometry(0.1)
   icosahedronMoon = new THREE.Mesh(icosahedronMoonGeo, icosahedronMat)
   icosahedronMoon2 = icosahedronMoon.clone()
 
@@ -450,22 +510,22 @@ function init() {
   icosahedronMoon.position.x = 3
   icosahedronMoon2.position.x = -2
 
-  const sphereSmallGeo = new THREE.SphereGeometry(0.1, 25, 25)
-  const sphereSmallMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const sphereSmallGeo = new THREE.SphereBufferGeometry(0.1, 25, 25)
+  const sphereSmallMat = planetaryMaterial
   smallSphere = new THREE.Mesh(sphereSmallGeo, sphereSmallMat)
   scene.add(smallSphere)
   smallSphere.position.set(0, 0, 60)
 
-  const dodecahedronGeo = new THREE.DodecahedronGeometry()
-  const dodecahedronMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const dodecahedronGeo = new THREE.DodecahedronBufferGeometry()
+  const dodecahedronMesh = planetaryMaterial
   dodecahedron = new THREE.Mesh(dodecahedronGeo, dodecahedronMesh)
 
-  const dodecahedron2Geo = new THREE.DodecahedronGeometry(0.3)
-  const dodecahedron2Mesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const dodecahedron2Geo = new THREE.DodecahedronBufferGeometry(0.3)
+  const dodecahedron2Mesh = planetaryMaterial
   dodecahedron2 = new THREE.Mesh(dodecahedron2Geo, dodecahedron2Mesh)
 
-  const dodecahedron3Geo = new THREE.DodecahedronGeometry(0.14)
-  const dodecahedron3Mesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const dodecahedron3Geo = new THREE.DodecahedronBufferGeometry(0.14)
+  const dodecahedron3Mesh = planetaryMaterial
   dodecahedron3 = new THREE.Mesh(dodecahedron3Geo, dodecahedron3Mesh)
 
   // dodecahedron.position.set(0, 0, 80)
@@ -485,12 +545,12 @@ function init() {
   workBox.position.set(0, -2, 80)
 
 
-  const bookMesh = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
-  const book1Geo = new THREE.BoxGeometry(0.1, 1, 0.75)
+  const bookMesh = planetaryMaterial
+  const book1Geo = new THREE.BoxBufferGeometry(0.1, 1, 0.75)
   const book1 = new THREE.Mesh(book1Geo, bookMesh)
   book1.rotation.y = -45 * Math.PI / 180
 
-  const book2Geo = new THREE.BoxGeometry(0.1, 1, 0.75)
+  const book2Geo = new THREE.BoxBufferGeometry(0.1, 1, 0.75)
   const book2 = new THREE.Mesh(book2Geo, bookMesh)
   book2.position.x = 0.40
   book2.rotation.y = 45 * Math.PI / 180
@@ -503,9 +563,7 @@ function init() {
   book.position.z = 100
   book.rotation.x = -55 * Math.PI / 180
 
-
-
-  const blackSphereGeo = new THREE.SphereGeometry(1, 10, 10)
+  const blackSphereGeo = new THREE.SphereBufferGeometry(1, 10, 10)
   const blackSphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
   const blackSphere = new THREE.Mesh(blackSphereGeo, blackSphereMat)
 
@@ -520,37 +578,123 @@ function init() {
   octaOrbit3 = new THREE.Group()
   octaOrbit3.position.set(0, -1, 140)
 
-  const octahedron2Geo = new THREE.OctahedronGeometry(0.2)
-  const octahedron2Mat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const octahedron2Geo = new THREE.OctahedronBufferGeometry(0.2)
+  const octahedron2Mat = planetaryMaterial
   octahedron2 = new THREE.Mesh(octahedron2Geo, octahedron2Mat)
   octaOrbit3.add(octahedron2)
 
-  const octahedron3Geo = new THREE.OctahedronGeometry(0.2)
-  const octahedron3Mat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const octahedron3Geo = new THREE.OctahedronBufferGeometry(0.2)
+  const octahedron3Mat = planetaryMaterial
   octahedron3 = new THREE.Mesh(octahedron3Geo, octahedron3Mat)
   octahedron3.position.x = 2
   octaOrbit3.add(octahedron3)
 
-  const octahedron4Geo = new THREE.OctahedronGeometry(0.2)
-  const octahedron4Mat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100 })
+  const octahedron4Geo = new THREE.OctahedronBufferGeometry(0.2)
+  const octahedron4Mat = planetaryMaterial
   octahedron4 = new THREE.Mesh(octahedron4Geo, octahedron4Mat)
   octahedron4.position.x = -2
   octaOrbit3.add(octahedron4)
 
   scene.add(octaOrbit3)
 
-  const sphereGeo = new THREE.SphereGeometry(0.2, 20, 20)
-  const sphereMat = new THREE.MeshBasicMaterial({ color: 0xffe4ce })
-  sphere = new THREE.Mesh(sphereGeo, sphereMat)
-  scene.add(sphere)
-  sphere.position.set(0, 0, 190)
-  gateWarp1Id = sphere.id
+  const tetraGeo = new THREE.TetrahedronBufferGeometry(0.8)
+  const tetraMat = solidWhiteMaterial
+  tetra = new THREE.Mesh(tetraGeo, tetraMat)
+  scene.add(tetra)
+  tetra.position.set(0, 0, 190)
+  gateWarp1Id = tetra.id
 
-  const starGeo = new THREE.OctahedronGeometry(2)
-  const starMat = new THREE.MeshBasicMaterial(0xffffff)
-  const star = new THREE.Mesh(starGeo, starMat)
-  scene.add(star)
-  star.position.z = 580
+  starGroup = new THREE.Group()
+
+  const starGeo = new THREE.IcosahedronBufferGeometry(1.2, 1)
+  const starMat = starMaterial
+  star = new THREE.Mesh(starGeo, starMat)
+  star.position.x = -2
+  starGroup.add(star)
+
+  const star2Geo = new THREE.IcosahedronBufferGeometry(0.8, 1)
+  const star2Mat = starMaterial
+  star2 = new THREE.Mesh(star2Geo, star2Mat)
+  star2.position.x = 3
+  starGroup.add(star2)
+
+  const star3Geo = new THREE.IcosahedronBufferGeometry(0.15, 1)
+  const star3Mat = starMaterial
+  star3 = new THREE.Mesh(star3Geo, star3Mat)
+  star3.position.set(-10, 0, 590)
+  scene.add(star3)
+
+  const star4Geo = new THREE.IcosahedronBufferGeometry(0.15, 1)
+  const star4Mat = starMaterial
+  star4 = new THREE.Mesh(star4Geo, star4Mat)
+  star4.position.set(20, 2, 590)
+  scene.add(star4)
+
+  scene.add(starGroup)
+  starGroup.rotation.z += 45 * Math.PI / 180
+  starGroup.position.set(0, -2, 590)
+
+  // Socials
+
+  const blackHoleGeo = new THREE.IcosahedronBufferGeometry(0.15, 1)
+  const blackHoleMat = new THREE.MeshBasicMaterial(0x222222)
+  const blackhole = new THREE.Mesh(blackHoleGeo, blackHoleMat)
+
+  scene.add(blackhole)
+  blackhole.position.set(0, 0, 610)
+
+  const boxSocialGeo = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5)
+
+  fbOrbit = new THREE.Object3D()
+  fbOrbit.position.set(0, 0, 610)
+  fbOrbit.rotation.z = 20 * Math.PI / 180
+
+  const fbMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialFb) })
+  fb = new THREE.Mesh(boxSocialGeo, fbMat)
+  fb.position.set(4, 0, 0)
+  fbOrbit.add(fb)
+  scene.add(fbOrbit)
+  fbId = fb.id
+
+  instagramOrbit = new THREE.Object3D()
+  instagramOrbit.position.set(0, 0, 610)
+  instagramOrbit.rotation.z = -45 * Math.PI / 180
+
+  const instMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialInstagram) })
+  instagram = new THREE.Mesh(boxSocialGeo, instMat)
+  instagramOrbit.add(instagram)
+  scene.add(instagramOrbit)
+  instagram.position.set(2, 0, 0)
+  instagramId = instagram.id
+
+  githubOrbit = new THREE.Object3D()
+  githubOrbit.position.set(0, 0, 610)
+  githubOrbit.rotation.z = -20 * Math.PI / 180
+
+  const githubMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialGithub) })
+  github = new THREE.Mesh(boxSocialGeo, githubMat)
+  github.position.set(-4, 0, 0)
+  githubOrbit.add(github)
+  scene.add(githubOrbit)
+  githubId = github.id
+
+
+  linkedinOrbit = new THREE.Object3D()
+  linkedinOrbit.position.set(0, 0, 610)
+  linkedinOrbit.rotation.z = 75 * Math.PI / 180
+
+  const linkedinMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialLinkedin) })
+  linkedin = new THREE.Mesh(boxSocialGeo, linkedinMat)
+  linkedin.position.set(-2, 0, 0)
+  linkedinOrbit.add(linkedin)
+  scene.add(linkedinOrbit)
+  linkedinId = linkedin.id
+
+
+  tetra2 = new THREE.Mesh(tetraGeo, tetraMat)
+  scene.add(tetra2)
+  tetra2.position.set(0, 0, 630)
+  gateWarp2Id = tetra2.id
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
@@ -580,26 +724,10 @@ function init() {
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
-  document.addEventListener('pointerdown', onMouseDown, false)
+  document.addEventListener('pointerdown', onPointerDown, false)
   document.addEventListener('mousemove', onMouseMove, false);
   document.addEventListener('wheel', onMouseWheel, false);
   window.addEventListener('resize', onResize, false);
-}
-
-function onMouseDown() {
-  raycaster.setFromCamera(pointer, camera);
-  const intersects = raycaster.intersectObjects(scene.children);
-
-  if (intersects.length > 0) {
-    console.log("INTERSECT")
-    console.log(intersects)
-    if (intersects[0].object.id === gateWarp1Id) {
-      intersects[0].object.material.color.set(0x000000)
-      warpDriveEnabled = true
-      cameraSpeed = 0.5
-    }
-
-  }
 }
 
 function animate() {
@@ -659,21 +787,44 @@ function animate() {
 
   octaOrbit3.rotation.y += 0.004
 
+  tetra.rotation.x += 0.004
+  tetra.rotation.y += 0.004
 
+  starGroup.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.002)
+
+  star.rotation.y += 0.001
+  star2.rotation.y += 0.001
+
+  // Social
+  fb.rotation.y += 0.005
+  fb.rotation.x += 0.001
+  fbOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.002)
+
+  instagram.rotation.y += 0.005
+  instagram.rotation.x += 0.004
+  instagramOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.004)
+
+  github.rotation.y += 0.005
+  github.rotation.x += 0.004
+  githubOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.004)
+
+  linkedin.rotation.y += 0.005
+  linkedin.rotation.x += 0.004
+  linkedinOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.004)
 
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
 
   // faster travel
-  if (isFastNext && camera.position.z < 600) {
+  if (isFastNext && camera.position.z < 2000) {
     if (camera.fov < 100) {
       camera.fov += 0.2
       camera.updateProjectionMatrix()
     }
     camera.position.z += 0.1
   } else if (isFastPrev && camera.position.z > 10) {
-    if (camera.fov > 75) {
-      camera.fov -= 0.2
+    if (camera.fov < 100) {
+      camera.fov += 0.2
       camera.updateProjectionMatrix()
     }
     camera.position.z -= 0.1
@@ -696,8 +847,6 @@ function animate() {
   if (warpDriveEnabled) {
     camera.position.z += cameraSpeed
 
-
-
     if (camera.position.z > 210 && camera.position.z < 600) {
       if (camera.fov < 170) {
         camera.fov += 0.4
@@ -712,8 +861,29 @@ function animate() {
     }
   }
 
+  if (warpDriveToBeginning) {
+    camera.position.z += cameraSpeed
+
+    if (camera.position.z > 10) {
+      if (camera.fov < 170) {
+        camera.fov += 0.4
+        camera.updateProjectionMatrix()
+      }
+    } else {
+      if (camera.fov > 75) {
+        camera.fov -= 0.4
+        camera.updateProjectionMatrix()
+        warpDriveToBeginning = false
+      }
+    }
+  }
+
   requestAnimationFrame(animate)
   composer.render()
+}
+
+function openInNewTab(url) {
+  window.open(url, '_blank').focus();
 }
 
 function fastNextNavigation(event) {
@@ -752,10 +922,40 @@ function fastPrevNavigation(event) {
   }
 }
 
-function onMouseMove(event) {
+function onPointerDown(event) {
   pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
   pointer.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
+  raycaster.setFromCamera(pointer, camera);
+  const intersects = raycaster.intersectObjects(scene.children);
+
+  if (intersects.length > 0) {
+    if (intersects[0].object.id === gateWarp1Id) {
+      warpDriveEnabled = true
+      cameraSpeed = 0.5
+    }
+    if (intersects[0].object.id === gateWarp2Id) {
+      warpDriveToBeginning = true
+      cameraSpeed = -0.5
+    }
+
+    // social
+    if (intersects[0].object.id === fbId) {
+      openInNewTab("https://www.facebook.com/rifqi.n.rifqi.9/")
+    }
+    if (intersects[0].object.id === instagramId) {
+      openInNewTab("https://www.instagram.com/rief_01/")
+    }
+    if (intersects[0].object.id === githubId) {
+      openInNewTab("https://github.com/rifqirosyidi")
+    }
+    if (intersects[0].object.id === linkedinId) {
+      openInNewTab("https://www.linkedin.com/in/rifqi-rosyidi-125804169/")
+    }
+  }
+}
+
+function onMouseMove(event) {
   mouse.x = (event.clientX - windowHalf.x);
   mouse.y = (event.clientY - windowHalf.x);
 }
