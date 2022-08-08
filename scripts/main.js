@@ -67,21 +67,20 @@ let box,
   octahedron4,
   tetra,
   tetra2,
+  tetra3,
   starGroup,
   star,
   star2,
   star3,
-  star4;
+  star4,
+  wireframe,
+  wireframeMoon;
+
 
 let fb,
-  fbOrbit,
   instagram,
-  instagramOrbit,
   linkedin,
-  linkedinOrbit,
   github,
-  githubOrbit,
-
   fbId,
   instagramId,
   linkedinId,
@@ -89,10 +88,10 @@ let fb,
   ;
 
 // navigation
-let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false, warpDriveEnabled = false, warpDriveToBeginning = false;
+let isFastNext = false, isSlowNext = false, isSlowPrev = false, isFastPrev = false, warpDriveEnabled = false, warpDriveToBeginning = false, warpDriveToGalactic = false;
 let cameraSpeed;
 
-let gateWarp1Id, gateWarp2Id;
+let gateWarp1Id, gateWarp2Id, gateWarp3Id;
 
 
 const fNext = document.querySelector('.fnext')
@@ -160,6 +159,7 @@ function init() {
     ]);
 
   scene.background = skyBox
+
 
   const textureLoader = new THREE.TextureLoader(loadingManager)
   const sunTexture = new URL("/images/sunmap.jpg", import.meta.url).href;
@@ -398,33 +398,75 @@ function init() {
   scene.add(exploreThe)
 
   const socialCluster = generateText({
-    text: "Social-Med Cluster",
+    text: "Social-Med System",
     size: 0.5,
     position: [0, 3, 610]
   });
   scene.add(socialCluster);
 
   const backToPlanetary = generateText({
-    text: "Back to Beginning",
+    text: "Warp Drive to",
     size: 0.25,
-    position: [0, 4, 630]
+    position: [-3, 4, 630]
   })
   scene.add(backToPlanetary)
 
   const backToStart = generateText({
-    text: "Warp Drive to Planetary",
+    text: "The Planetary",
     size: 0.5,
-    position: [0, 3, 630]
+    position: [-3, 3, 630]
   });
   scene.add(backToStart);
+
+  const goToGalaxy = generateText({
+    text: "Warp Drive to",
+    size: 0.25,
+    position: [3, 4, 630]
+  })
+  scene.add(goToGalaxy)
+
+  const goToGalaxyDesc = generateText({
+    text: "The Galactic",
+    size: 0.5,
+    position: [3, 3, 630]
+  });
+  scene.add(goToGalaxyDesc);
+
+  const warning = generateText({
+    text: "Warning!",
+    size: 0.25,
+    position: [0, 4, 1220]
+  })
+  scene.add(warning)
+
+  const warningDesc = generateText({
+    text: "Your Spaceship has Crashed",
+    size: 0.5,
+    position: [0, 3, 1220]
+  });
+  scene.add(warningDesc);
+
+  const warningDet = generateText({
+    text: "Malfunction on Particle Accelerator Detected",
+    size: 0.25,
+    position: [0, 2, 1220]
+  });
+  scene.add(warningDet);
+
+  const contact = generateText({
+    text: "please contact `rief.rosyidi@gmail.com`",
+    size: 0.25,
+    position: [0, 0, 1220]
+  });
+  scene.add(contact);
 
 
   const vertices = [];
 
-  for (let i = 0; i < 15000; i++) {
+  for (let i = 0; i < 30000; i++) {
     const x = THREE.MathUtils.randFloatSpread(120);
     const y = THREE.MathUtils.randFloatSpread(120);
-    const z = THREE.MathUtils.randFloatSpread(2000);
+    const z = THREE.MathUtils.randFloatSpread(2500);
     vertices.push(x, y, z);
   }
 
@@ -563,15 +605,20 @@ function init() {
   book.position.z = 100
   book.rotation.x = -55 * Math.PI / 180
 
-  const blackSphereGeo = new THREE.SphereBufferGeometry(1, 10, 10)
-  const blackSphereMat = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
-  const blackSphere = new THREE.Mesh(blackSphereGeo, blackSphereMat)
+  const wireframeSphereGeo = new THREE.SphereBufferGeometry(1, 10, 10)
+  const wireframeSphereMet = new THREE.MeshPhongMaterial({ color: 0x504A4B, shininess: 100, reflectivity: 100, wireframe: true })
+  wireframe = new THREE.Mesh(wireframeSphereGeo, wireframeSphereMet)
+
+  const wireframeMoonGeo = new THREE.SphereBufferGeometry(0.2, 5, 5)
+  wireframeMoon = new THREE.Mesh(wireframeMoonGeo, wireframeSphereMet)
+  wireframeMoon.position.x = 3
 
   sphereOrbit = new THREE.Object3D()
   sphereOrbit.position.set(0, -1, 120)
   sphereOrbit.rotation.z = 0.25
 
-  sphereOrbit.add(blackSphere)
+  sphereOrbit.add(wireframe)
+  sphereOrbit.add(wireframeMoon)
   scene.add(sphereOrbit)
 
 
@@ -636,65 +683,42 @@ function init() {
 
   // Socials
 
-  const blackHoleGeo = new THREE.IcosahedronBufferGeometry(0.15, 1)
-  const blackHoleMat = new THREE.MeshBasicMaterial(0x222222)
-  const blackhole = new THREE.Mesh(blackHoleGeo, blackHoleMat)
-
-  scene.add(blackhole)
-  blackhole.position.set(0, 0, 610)
-
   const boxSocialGeo = new THREE.BoxBufferGeometry(0.5, 0.5, 0.5)
 
-  fbOrbit = new THREE.Object3D()
-  fbOrbit.position.set(0, 0, 610)
-  fbOrbit.rotation.z = 20 * Math.PI / 180
-
-  const fbMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialFb) })
+  const fbMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, map: textureLoader.load(socialFb) })
   fb = new THREE.Mesh(boxSocialGeo, fbMat)
-  fb.position.set(4, 0, 0)
-  fbOrbit.add(fb)
-  scene.add(fbOrbit)
+  fb.position.set(4, 0, 610)
+  scene.add(fb)
   fbId = fb.id
 
-  instagramOrbit = new THREE.Object3D()
-  instagramOrbit.position.set(0, 0, 610)
-  instagramOrbit.rotation.z = -45 * Math.PI / 180
-
-  const instMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialInstagram) })
+  const instMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, map: textureLoader.load(socialInstagram) })
   instagram = new THREE.Mesh(boxSocialGeo, instMat)
-  instagramOrbit.add(instagram)
-  scene.add(instagramOrbit)
-  instagram.position.set(2, 0, 0)
+  scene.add(instagram)
+  instagram.position.set(2, 0, 610)
   instagramId = instagram.id
 
-  githubOrbit = new THREE.Object3D()
-  githubOrbit.position.set(0, 0, 610)
-  githubOrbit.rotation.z = -20 * Math.PI / 180
-
-  const githubMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialGithub) })
+  const githubMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, map: textureLoader.load(socialGithub) })
   github = new THREE.Mesh(boxSocialGeo, githubMat)
-  github.position.set(-4, 0, 0)
-  githubOrbit.add(github)
-  scene.add(githubOrbit)
+  github.position.set(-4, 0, 610)
+  scene.add(github)
   githubId = github.id
 
-
-  linkedinOrbit = new THREE.Object3D()
-  linkedinOrbit.position.set(0, 0, 610)
-  linkedinOrbit.rotation.z = 75 * Math.PI / 180
-
-  const linkedinMat = new THREE.MeshBasicMaterial({ color: 0xaaaaaa, map: textureLoader.load(socialLinkedin) })
+  const linkedinMat = new THREE.MeshBasicMaterial({ color: 0xdddddd, map: textureLoader.load(socialLinkedin) })
   linkedin = new THREE.Mesh(boxSocialGeo, linkedinMat)
-  linkedin.position.set(-2, 0, 0)
-  linkedinOrbit.add(linkedin)
-  scene.add(linkedinOrbit)
+  linkedin.position.set(-2, 0, 610)
+  scene.add(linkedin)
   linkedinId = linkedin.id
-
 
   tetra2 = new THREE.Mesh(tetraGeo, tetraMat)
   scene.add(tetra2)
-  tetra2.position.set(0, 0, 630)
+  tetra2.position.set(-3, 0, 630)
   gateWarp2Id = tetra2.id
+
+  tetra3 = new THREE.Mesh(tetraGeo, tetraMat)
+  scene.add(tetra3)
+  tetra3.position.set(3, 0, 630)
+  gateWarp3Id = tetra3.id
+
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.25)
   scene.add(ambientLight)
@@ -784,11 +808,18 @@ function animate() {
   book.rotation.z += 0.003
 
   sphereOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.005)
+  wireframeMoon.rotation.y += 0.02
 
   octaOrbit3.rotation.y += 0.004
 
   tetra.rotation.x += 0.004
   tetra.rotation.y += 0.004
+
+  tetra2.rotation.x += 0.004
+  tetra2.rotation.y += 0.004
+
+  tetra3.rotation.x += 0.004
+  tetra3.rotation.y += 0.004
 
   starGroup.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.002)
 
@@ -796,21 +827,17 @@ function animate() {
   star2.rotation.y += 0.001
 
   // Social
-  fb.rotation.y += 0.005
+  fb.rotation.y += 0.01
   fb.rotation.x += 0.001
-  fbOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.002)
 
-  instagram.rotation.y += 0.005
-  instagram.rotation.x += 0.004
-  instagramOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.004)
+  instagram.rotation.y += 0.01
+  instagram.rotation.x += 0.001
 
-  github.rotation.y += 0.005
-  github.rotation.x += 0.004
-  githubOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.004)
+  github.rotation.y += 0.01
+  github.rotation.x += 0.001
 
-  linkedin.rotation.y += 0.005
-  linkedin.rotation.x += 0.004
-  linkedinOrbit.rotateOnAxis(new THREE.Vector3(0, 1, 0), 0.004)
+  linkedin.rotation.y += 0.01
+  linkedin.rotation.x += 0.001
 
   camera.rotation.x += 0.005 * (target.y - camera.rotation.x);
   camera.rotation.y += 0.005 * (target.x - camera.rotation.y);
@@ -878,6 +905,28 @@ function animate() {
     }
   }
 
+  if (warpDriveToGalactic) {
+    camera.position.z += cameraSpeed
+    if (camera.position.z > 670 && camera.position.z < 1230) {
+      if (camera.fov < 178) {
+        camera.fov += 0.4
+        camera.updateProjectionMatrix()
+      }
+    } else {
+      // scene.background = new THREE.Color(0xffffff)
+
+      if (camera.fov > 75) {
+        camera.fov -= 0.4
+        camera.updateProjectionMatrix()
+        warpDriveToGalactic = false
+      }
+    }
+  }
+
+  if (camera.position.z > 1200) {
+    scene.background = new THREE.Color(0x0a0a0a)
+  }
+
   requestAnimationFrame(animate)
   composer.render()
 }
@@ -937,6 +986,11 @@ function onPointerDown(event) {
     if (intersects[0].object.id === gateWarp2Id) {
       warpDriveToBeginning = true
       cameraSpeed = -0.5
+    }
+
+    if (intersects[0].object.id === gateWarp3Id) {
+      warpDriveToGalactic = true
+      cameraSpeed = 0.75
     }
 
     // social
